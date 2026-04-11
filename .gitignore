@@ -1,0 +1,12 @@
+venv/
+__pycache__/
+*.pyc
+
+# Model Weights
+*.pth
+*.h5
+*.keras
+
+# Large Data
+dataset/
+testset/

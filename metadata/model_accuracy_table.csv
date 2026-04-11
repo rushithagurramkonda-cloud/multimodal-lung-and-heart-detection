@@ -1,0 +1,5 @@
+Model,Accuracy (%)
+Heart Image CNN,84.12698412698413
+Lung Image CNN,98.78571428571429
+Heart Audio ResNet,98.62068965517241
+Lung Audio ResNet,75.17241379310344
