@@ -1,0 +1,5 @@
+Model,Accuracy,Precision,Recall,F1 Score
+Heart Image CNN,84,0.8788,0.84,0.8358
+Lung Image CNN,99.33,0.9933,0.9933,0.9933
+Heart Audio ResNet,88.57,0.8898,0.8857,0.8848
+Lung Audio ResNet,100,1,1,1
