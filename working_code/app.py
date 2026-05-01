@@ -157,9 +157,7 @@ def audio_to_spectrogram(uploaded_file):
     plt.savefig(temp_img.name, bbox_inches="tight", pad_inches=0)
     plt.close()
 
-    img = Image.open(temp_img.name).convert("RGB")
-
-    return img
+    return temp_img
 
 # -------------------------
 # STREAMLIT UI
