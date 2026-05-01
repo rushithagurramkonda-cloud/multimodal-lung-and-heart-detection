@@ -128,8 +128,11 @@ for epoch in range(10):
     heart_loss.append(epoch_loss)
     heart_acc.append(epoch_acc)
     print(f"Heart Epoch {epoch+1} Loss: {running_loss/len(heart_loader):.4f} Accuracy: {epoch_acc:.4f}")
+import os
 
-torch.save(heart_model.state_dict(), "Model_implementation/models/heart_audio_model.pth")
+os.makedirs("models", exist_ok=True)
+
+torch.save(heart_model.state_dict(), "models/heart_audio_model.pth")
 
 print("Heart audio model saved")
 
@@ -169,7 +172,7 @@ for epoch in range(10):
 
     print(f"Lung Epoch {epoch+1} Loss: {running_loss/len(lung_loader):.4f} Accuracy: {epoch_acc:.4f}")
 
-torch.save(lung_model.state_dict(), "Model_implementation/models/lung_audio_model.pth")
+torch.save(lung_model.state_dict(), "models/lung_audio_model.pth")
 
 print("Lung audio model saved") 
 

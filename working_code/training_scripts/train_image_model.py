@@ -123,7 +123,7 @@ def train_model(loader, model_name):
         print(f"{model_name} Epoch {epoch+1}/{EPOCHS} | Loss: {epoch_loss:.4f} | Accuracy: {epoch_acc:.4f}")
 
     # Save model
-    torch.save(model.state_dict(), f"Model_implementation/models/{model_name}.pth")
+    torch.save(model.state_dict(), f"models/{model_name}.pth")
     print(f"{model_name} saved!")
 
     return loss_list, acc_list
