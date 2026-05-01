@@ -128,9 +128,17 @@ def predict(image, model, classes):
 # AUDIO → SPECTROGRAM
 # =========================
 
-def audio_to_spectrogram(audio_file):
+def audio_to_spectrogram(uploaded_file):
 
-    y, sr = librosa.load(audio_file)
+    import tempfile
+
+    # Save uploaded file temporarily
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        tmp.write(uploaded_file.read())
+        temp_audio_path = tmp.name
+
+    # Load audio correctly
+    y, sr = librosa.load(temp_audio_path, sr=None)
 
     plt.figure(figsize=(3,3))
 
@@ -144,6 +152,7 @@ def audio_to_spectrogram(audio_file):
 
     plt.axis("off")
 
+    # Save spectrogram image
     temp_img = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
     plt.savefig(temp_img.name, bbox_inches="tight", pad_inches=0)
     plt.close()
@@ -169,6 +178,7 @@ uploaded_file = st.file_uploader(
     "Upload File",
     type=["png","jpg","jpeg","wav"]
 )
+
 
 if uploaded_file is not None:
 
