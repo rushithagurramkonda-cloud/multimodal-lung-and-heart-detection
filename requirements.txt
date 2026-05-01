@@ -5,3 +5,4 @@ pillow
 librosa
 matplotlib
 numpy
+gdown

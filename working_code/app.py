@@ -46,6 +46,25 @@ class CNNModel(nn.Module):
 # -------------------------
 # LOAD MODELS (CACHED)
 # -------------------------
+import gdown
+import os
+
+def download_model(file_id, output):
+    if not os.path.exists(output):
+        url = f"https://drive.google.com/uc?id={file_id}"
+        gdown.download(url, output, quiet=False)
+
+def load_models():
+
+    os.makedirs("models", exist_ok=True)
+
+    # DOWNLOAD MODELS
+    download_model("1fGh00naU7seheAlQjPl4euAXig4zp4yA", "models/heart_image_model.pth")
+    download_model("1z3CQL0XM9eTVOtHhQfv5iv7NHHma7kMs", "models/lung_image_model.pth")
+    download_model("1eOWM0U-kX8rwH6TUjZBn_eCC3eO2ctWm", "models/heart_audio_model.pth")
+    download_model("1WTI7JreGLz7zqPgAV1t2BgTXC-XXGBxE", "models/lung_audio_model.pth")
+
+
 @st.cache_resource
 def load_models():
 
