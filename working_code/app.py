@@ -2,72 +2,76 @@ import streamlit as st
 import torch
 import torch.nn as nn
 from torchvision import transforms
-from torchvision.models import resnet18
 from PIL import Image
+from torchvision.models import resnet18
 import librosa
 import librosa.display
 import matplotlib.pyplot as plt
 import tempfile
+import os
+import gdown
 
 device = "cpu"
 
-# -------------------------
-# CNN MODEL
-# -------------------------
-class CNNModel(nn.Module):
-    def __init__(self):
-        super(CNNModel, self).__init__()
-
-        self.conv = nn.Sequential(
-            nn.Conv2d(3, 16, 3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2,2),
-
-            nn.Conv2d(16, 32, 3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2,2),
-
-            nn.Conv2d(32, 64, 3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2,2)
-        )
-
-        self.fc = nn.Sequential(
-            nn.Linear(64*16*16,128),
-            nn.ReLU(),
-            nn.Linear(128,2)
-        )
-
-    def forward(self,x):
-        x = self.conv(x)
-        x = x.view(x.size(0), -1)
-        return self.fc(x)
-
-# -------------------------
-# LOAD MODELS (CACHED)
-# -------------------------
-import gdown
-import os
+# =========================
+# DOWNLOAD MODELS
+# =========================
 
 def download_model(file_id, output):
     if not os.path.exists(output):
         url = f"https://drive.google.com/uc?id={file_id}"
         gdown.download(url, output, quiet=False)
 
+# =========================
+# CNN MODEL
+# =========================
+
+class CNNModel(nn.Module):
+    def __init__(self):
+        super(CNNModel, self).__init__()
+
+        self.conv = nn.Sequential(
+            nn.Conv2d(3,16,3,padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+
+            nn.Conv2d(16,32,3,padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+
+            nn.Conv2d(32,64,3,padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2)
+        )
+
+        self.fc = nn.Sequential(
+            nn.Linear(16384,128),
+            nn.ReLU(),
+            nn.Linear(128,2)
+        )
+
+    def forward(self,x):
+        x = self.conv(x)
+        x = x.view(x.size(0),-1)
+        x = self.fc(x)
+        return x
+
+# =========================
+# LOAD MODELS
+# =========================
+
+@st.cache_resource
 def load_models():
 
     os.makedirs("models", exist_ok=True)
 
-    # DOWNLOAD MODELS
+    # 🔥 ADD YOUR FILE IDs HERE
     download_model("1fGh00naU7seheAlQjPl4euAXig4zp4yA", "models/heart_image_model.pth")
     download_model("1z3CQL0XM9eTVOtHhQfv5iv7NHHma7kMs", "models/lung_image_model.pth")
     download_model("1eOWM0U-kX8rwH6TUjZBn_eCC3eO2ctWm", "models/heart_audio_model.pth")
     download_model("1WTI7JreGLz7zqPgAV1t2BgTXC-XXGBxE", "models/lung_audio_model.pth")
 
-
-@st.cache_resource
-def load_models():
-
+    # IMAGE MODELS
     heart_image_model = CNNModel()
     heart_image_model.load_state_dict(
         torch.load("models/heart_image_model.pth", map_location=device)
@@ -78,6 +82,7 @@ def load_models():
         torch.load("models/lung_image_model.pth", map_location=device)
     )
 
+    # AUDIO MODELS
     heart_audio_model = resnet18(weights=None)
     heart_audio_model.fc = nn.Linear(512,2)
     heart_audio_model.load_state_dict(
@@ -90,26 +95,24 @@ def load_models():
         torch.load("models/lung_audio_model.pth", map_location=device)
     )
 
-    heart_image_model.eval()
-    lung_image_model.eval()
-    heart_audio_model.eval()
-    lung_audio_model.eval()
-
     return heart_image_model, lung_image_model, heart_audio_model, lung_audio_model
 
+# LOAD
 heart_image_model, lung_image_model, heart_audio_model, lung_audio_model = load_models()
 
-# -------------------------
+# =========================
 # TRANSFORM
-# -------------------------
+# =========================
+
 transform = transforms.Compose([
     transforms.Resize((128,128)),
     transforms.ToTensor()
 ])
 
-# -------------------------
-# PREDICTION FUNCTION
-# -------------------------
+# =========================
+# PREDICT FUNCTION
+# =========================
+
 def predict(image, model, classes):
 
     image = transform(image).unsqueeze(0)
@@ -121,17 +124,13 @@ def predict(image, model, classes):
 
     return classes[pred.item()], conf.item()
 
-# -------------------------
+# =========================
 # AUDIO → SPECTROGRAM
-# -------------------------
+# =========================
+
 def audio_to_spectrogram(audio_file):
 
-    # Save uploaded file temporarily
-    with tempfile.NamedTemporaryFile(delete=False) as tmp:
-        tmp.write(audio_file.read())
-        tmp_path = tmp.name
-
-    y, sr = librosa.load(tmp_path)
+    y, sr = librosa.load(audio_file)
 
     plt.figure(figsize=(3,3))
 
